@@ -1,0 +1,112 @@
+﻿<Window x:Class="WitUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="clr-namespace:WitUI.Converters"
+        xmlns:conv2="clr-namespace:IAmRaf.MVVM.Converters;assembly=IAmRaf.MVVM"
+        xmlns:local="clr-namespace:WitUI"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Icon="{Binding Path=CurrentDashboardItem.Image}"
+        Width="1280" Height="800"
+        Background="AliceBlue"
+        FontSize="16">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="56"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="25"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" Grid.ColumnSpan="3" >
+                <!--<Button Command="{Binding GoBack}" IsEnabled="{Binding CanGoBack}" Style="{StaticResource toolBarButtonImage}">
+                    <Image Source="Assets/arrow_back_color_32xLG.png" />
+                </Button>-->
+
+                <ItemsControl ItemsSource="{Binding DashboardItems}" >
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding Command}"
+                                CommandParameter="{Binding ViewType}"
+                                IsEnabled="{Binding IsEnabled}"
+                                Style="{StaticResource toolBarButtonImage}">
+                                <Image Source="{Binding Image}" />
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!--<ToggleButton IsChecked="{Binding AutoAddToReceipt}" Style="{StaticResource toolBarButtonImage}">
+                    <Image Source="/Assets/LineArrow_16x.png" />
+                </ToggleButton>-->
+
+                <!--<Button Command="{Binding OpenDialogPrimary}" Style="{StaticResource toolBarButtonImage}">
+                <Image Source="/Assets/typography_Number_1_16xLG.png" />
+            </Button>
+            <Button Command="{Binding OpenDialogSecondary}" Style="{StaticResource toolBarButtonImage}">
+                <Image Source="/Assets/typography_Number_2_16xLG.png" />
+            </Button>
+            <Button Command="{Binding OpenDialogTertiary}" Style="{StaticResource toolBarButtonImage}">
+                <Image Source="/Assets/typography_Number_3_16xLG.png" />
+            </Button>-->
+
+                <TextBlock Margin="18,0,10,0" Text="COM:" VerticalAlignment="Center"
+                           FontSize="16" Foreground="DarkBlue"/>
+                <ComboBox ItemsSource="{Binding Ports}"
+                          Margin="0,0,10,0" VerticalAlignment="Center"
+                          MaxHeight="40"
+                          SelectedItem="{Binding SelectedPort}" MinWidth="150"
+                          />
+
+                <Button Command="{Binding RefreshPortsCommand}" Margin="5" 
+                        Style="{StaticResource toolBarButtonImage}">
+                    <Button.ToolTip>
+                        <TextBlock Text="Refresh" FontSize="16" Foreground="DarkBlue"/>
+                    </Button.ToolTip>
+                    <Image Source="/Assets/Refresh.png"/>
+                </Button>
+
+                <Button Command="{Binding OpenCloseCOMCommand}" Margin="5" 
+                        Style="{StaticResource toolBarButtonImage}">
+                    <Button.ToolTip>
+                        <TextBlock Text="Open/Close COM" FontSize="16" Foreground="DarkBlue"/>
+                    </Button.ToolTip>
+                    <Image Source="{Binding IsOpenCOM,
+                        Converter={conv:BoolImageConverter 
+                        ImageOn=Assets/Connect_Plugged_48x.png, 
+                        ImageOff=Assets/Connect_Unplugged_48x.png}}"/>
+                </Button>
+
+                <Button Command="{Binding StartStopCommand}"  Margin="5"
+                        IsEnabled="{Binding IsOpenCOM}"
+                        Style="{StaticResource toolBarButtonImage}">
+                    <Button.ToolTip>
+                        <TextBlock Text="Start" FontSize="16" Foreground="DarkBlue"/>
+                    </Button.ToolTip>
+                    <Image Source="{Binding IsRecording,
+                        Converter={conv:BoolImageConverter 
+                        ImageOn=Assets/StopTime_48x.png, 
+                        ImageOff=Assets/StartTime_48x.png}}"/>
+                </Button>
+            </StackPanel>
+
+
+            <Grid Grid.Row="1" Grid.ColumnSpan="3" Margin="15">
+                <Frame x:Name="frame" Source="MainView.xaml" NavigationUIVisibility="Hidden" Background="#4CEAEAEA">
+                </Frame>
+            </Grid>
+
+        </Grid>
+
+
+    </Grid>
+</Window>

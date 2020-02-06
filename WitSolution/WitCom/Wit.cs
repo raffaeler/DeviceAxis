@@ -6,14 +6,16 @@ using System.IO.Pipelines;
 using System.Text;
 using System.Threading.Tasks;
 using System.Buffers;
-using WitConsole.Helpers;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Linq;
 
-namespace WitConsole
+namespace WitCom
 {
     public class Wit : IDisposable
     {
+        private static readonly SequencePosition ZeroPosition = new SequencePosition();
+
         //private const byte Start = 0x55;
         //private const byte P1 = 0x51;
         //private const byte P2 = 0x52;
@@ -30,15 +32,14 @@ namespace WitConsole
 
         private SerialPort _serial;
         private Stopwatch _clock = new Stopwatch();
-        //public event EventHandler<WitFrame> FrameEvent;
 
         private Pipe _pipe;
         private Task _writeTask;
         private Task _readTask;
-        private ConcurrentQueue<WitDecoder> _queue = new ConcurrentQueue<WitDecoder>();
+        private ConcurrentQueue<WitFrame> _queue = new ConcurrentQueue<WitFrame>();
         private bool _isSync;
         private int _counter;
-        private TaskCompletionSource<WitDecoder> _completion = new TaskCompletionSource<WitDecoder>();
+        private TaskCompletionSource<WitFrame> _completion = new TaskCompletionSource<WitFrame>();
 
 
         public Wit(string portName)
@@ -85,7 +86,6 @@ namespace WitConsole
             //_serial.Write(new byte[] { 0xFF, 0xAA, 0x52 }, 0, 3);
             //var buf = new Byte[10240];
             //_serial.Read(buf, 0, 1024);
-
         }
 
         public void Close()
@@ -102,21 +102,21 @@ namespace WitConsole
 
         public static string[] GetPortNames()
         {
-            return SerialPort.GetPortNames();
+            return SerialPort.GetPortNames().OrderBy(f => f).ToArray();
         }
 
-        private Task<bool> Consume(ConsumerData data)
+        private Task<SequencePosition> Consume(ReadOnlySequence<byte> data)
         {
-            if (data.Memory.Length < _minimumReadBytes)
+            if (data.Length < _minimumReadBytes)
             {
-                return Task.FromResult(false);
+                return Task.FromResult(ZeroPosition);
             }
 
             var buffer = new byte[_minimumReadBytes];
             buffer[0] = _seq1[0];
             buffer[1] = _seq1[1];
             var buf = buffer.AsSpan().Slice(2);
-            var reader = new SequenceReader<byte>(data.Memory);
+            var reader = new SequenceReader<byte>(data);
             while (!reader.End)
             {
                 if (!_isSync)
@@ -125,60 +125,50 @@ namespace WitConsole
                     {
                         // remove useless data
                         reader.Advance(reader.Length);
-                        data.Consumed = reader.Position;
-                        return Task.FromResult(true);
+                        return Task.FromResult(reader.Position);
                     }
 
-                    data.Consumed = reader.Position;
                     _isSync = true;
-                    return Task.FromResult(true);
+                    return Task.FromResult(reader.Position);
                 }
 
                 if (reader.TryReadTo(out ReadOnlySequence<byte> sequence, _seq1.AsSpan(), true))
                 {
                     sequence.CopyTo(buf);
-                    data.Consumed = reader.Position;
-                    _queue.Enqueue(new WitDecoder(_clock.Elapsed, buffer));
-                    return Task.FromResult(true);
-
+                    _queue.Enqueue(new WitFrame(_clock.Elapsed, buffer));
+                    return Task.FromResult(reader.Position);
                 }
 
                 Debug.WriteLine($"Wait {sequence.Length}");
-                data.Consumed = reader.Position;
-                return Task.FromResult(true);
+                return Task.FromResult(reader.Position);
             }
 
             // serial connection has been closed
-            Console.WriteLine("End");
-            return Task.FromResult(false);
+            Debug.WriteLine("End");
+            return Task.FromResult(ZeroPosition);
         }
 
         public void Print()
         {
             while (true)
             {
-                if (_queue.TryDequeue(out WitDecoder frame))
+                if (_queue.TryDequeue(out WitFrame frame))
                 {
                     Console.SetCursorPosition(0, 0);
                     Console.WriteLine($"Frame {_counter++} - Buffer {_queue.Count}    ");
                     Console.WriteLine(frame.ToString());
+                    //Thread.Sleep(8);
                 }
                 else
                 {
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(8);
             }
         }
 
         private async Task ConsumeAsync(PipeReader reader,
-            Func<ConsumerData, Task<bool>> consumerFunc)
+            Func<ReadOnlySequence<byte>, Task<SequencePosition>> consumerFunc)
         {
-            var source = new ConsumerData()
-            {
-                Reader = reader,
-                Memory = ReadOnlySequence<byte>.Empty,
-            };
-
             try
             {
                 while (true)
@@ -190,17 +180,7 @@ namespace WitConsole
                         break;
                     }
 
-                    SequencePosition consumed;
-                    source.Memory = buffer;
-                    if (await consumerFunc(source))
-                    {
-                        consumed = source.Consumed;
-                    }
-                    else
-                    {
-                        consumed = buffer.GetPosition(0);
-                    }
-
+                    var consumed = await consumerFunc(buffer);
                     reader.AdvanceTo(consumed);
                 }
 

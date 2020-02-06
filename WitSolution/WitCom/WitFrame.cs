@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace WitConsole.Helpers
+namespace WitCom
 {
-    public class WitDecoder
+    public class WitFrame
     {
         private DateTime TimeStart = DateTime.Now;
         private double[] LastTime = new double[10];
-        private double TimeElapse;
-        private TimeSpan _clock;
 
-        public WitDecoder(TimeSpan clock, ReadOnlySpan<byte> block)
+        public WitFrame(TimeSpan clock, ReadOnlySpan<byte> block)
         {
-            _clock = clock;
+            this.Clock = clock;
             Decode(block);
         }
 
+        public TimeSpan Clock { get; }
         public Data LinearAcceleration { get; private set; }
         public Data AngularVelocity { get; private set; }
         public Data Angle { get; private set; }
@@ -42,8 +41,6 @@ namespace WitConsole.Helpers
                 return;
             }
 
-            //TimeElapse = (DateTime.Now - TimeStart).TotalMilliseconds / 1000;
-
             var block1 = block.Slice(0, 11);
             var block2 = block.Slice(11, 11);
             var block3 = block.Slice(22, 11);
@@ -51,11 +48,6 @@ namespace WitConsole.Helpers
             SetLinearAcceleration(block1);
             SetAngularVelocity(block2);
             SetAngle(block3);
-
-            //???
-            //if ((TimeElapse - LastTime[1]) < 0.1) return;
-            //LastTime[1] = TimeElapse;
-            //???
         }
 
         private void SetLinearAcceleration(ReadOnlySpan<byte> block)
@@ -91,10 +83,10 @@ namespace WitConsole.Helpers
         private double[] ToDouble(ReadOnlySpan<byte> block)
         {
             double[] Data = new double[4];
-            Data[0] = BitConverter.ToInt16(block.Slice(2));  //(block, 2);
-            Data[1] = BitConverter.ToInt16(block.Slice(4));  //(block, 4);
-            Data[2] = BitConverter.ToInt16(block.Slice(6));  //(block, 6);
-            Data[3] = BitConverter.ToInt16(block.Slice(8));  //(block, 8);
+            Data[0] = BitConverter.ToInt16(block.Slice(2));
+            Data[1] = BitConverter.ToInt16(block.Slice(4));
+            Data[2] = BitConverter.ToInt16(block.Slice(6));
+            Data[3] = BitConverter.ToInt16(block.Slice(8));
 
             return Data;
         }
@@ -129,36 +121,11 @@ namespace WitConsole.Helpers
         public override string ToString()
         {
             var sb = new StringBuilder();
-            //sb.Append(DateTime.Now.ToLongTimeString() + "\r\n");
-            sb.Append(_clock.ToString("hh\\:mm\\:ss\\:fffff") + "\r\n");
+            sb.Append(Clock.ToString("hh\\:mm\\:ss\\:fffff") + "\r\n");
             sb.Append(LinearAcceleration);
             sb.Append(AngularVelocity);
             sb.Append(Angle.ToString(true));
-            var str = sb.ToString();
-            //var str = DateTime.Now.ToLongTimeString() + "\r\n"
-            //                + TimeElapse.ToString("f3") + "\r\n\r\n"
-            //                + a[0].ToString("f2") + " g\r\n"
-            //                + a[1].ToString("f2") + " g\r\n"
-            //                + a[2].ToString("f2") + " g\r\n\r\n"
-            //                + w[0].ToString("f2") + " deg/s\r\n"
-            //                + w[1].ToString("f2") + " deg/s\r\n"
-            //                + w[2].ToString("f2") + " deg/s\r\n\r\n"
-            //                + Angle[0].ToString("f2") + " °\r\n"
-            //                + Angle[1].ToString("f2") + " °\r\n"
-            //                + Angle[2].ToString("f2") + " °\r\n\r\n"
-            //                + h[0].ToString("f0") + " mG\r\n"
-            //                + h[1].ToString("f0") + " mG\r\n"
-            //                + h[2].ToString("f0") + " mG\r\n\r\n"
-            //                + Temperature.ToString("f2") + " ℃\r\n"
-            //                + Pressure.ToString("f0") + " Pa\r\n"
-            //                + Altitude.ToString("f2") + " m\r\n\r\n"
-            //                + (Longitude / 10000000).ToString("f0") + "°" + ((double)(Longitude % 10000000) / 1e5).ToString("f5") + "'\r\n"
-            //                + (Latitude / 10000000).ToString("f0") + "°" + ((double)(Latitude % 10000000) / 1e5).ToString("f5") + "'\r\n"
-            //                + GPSHeight.ToString("f1") + " m\r\n"
-            //                + GPSYaw.ToString("f1") + " °\r\n"
-            //                + GroundVelocity.ToString("f3") + " km/h";
-
-            return str;
+            return sb.ToString();
         }
     }
 }

@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+
+    <VersionPrefix>1.0.1</VersionPrefix>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Connect_Plugged_48x.png" />
+    <None Remove="Assets\Connect_Unplugged_48x.png" />
+    <None Remove="Assets\Refresh.png" />
+    <None Remove="Assets\StartTime_48x.png" />
+    <None Remove="Assets\StartTime_48x_disabled.png" />
+    <None Remove="Assets\StopTime_48x.png" />
+    <None Remove="Assets\StopTime_48x_disabled.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controls\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.1" />
+
+    <PackageReference Include="NetEscapades.Extensions.Logging.RollingFile" Version="2.2.0" />
+
+    <PackageReference Include="OxyPlot.Core" Version="2.0.0" />
+
+    <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
+    <PackageReference Include="System.Reactive" Version="4.3.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\WitCom\WitCom.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\WitCom\WitCom.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Reference Include="IAmRaf.MVVM">
+      <HintPath>..\IAmRaf.MVVM.dll</HintPath>
+    </Reference>
+    <Reference Include="IAmRaf.MVVM.Reactive">
+      <HintPath>..\IAmRaf.MVVM.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Resource Include="Assets\Connect_Plugged_48x.png" />
+    <Resource Include="Assets\Connect_Unplugged_48x.png" />
+    <Resource Include="Assets\Refresh.png" />
+    <Resource Include="Assets\StartTime_48x.png" />
+    <Resource Include="Assets\StartTime_48x_disabled.png" />
+    <Resource Include="Assets\StopTime_48x.png" />
+    <Resource Include="Assets\StopTime_48x_disabled.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
+</Project>
