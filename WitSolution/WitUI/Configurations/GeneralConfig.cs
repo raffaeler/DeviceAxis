@@ -8,5 +8,7 @@ namespace WitUI.Configurations
     {
         public bool StartMaximized { get; set; }
         public string COMPort { get; set; }
+
+        public ChartConfig ChartConfig { get; set; }
     }
 }

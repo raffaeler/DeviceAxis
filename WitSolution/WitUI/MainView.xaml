@@ -18,12 +18,26 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Text="{Binding Text}" Style="{StaticResource MessageStyle}" />
 
-        <oxy:PlotView Grid.Row="1" Model="{Binding GraphData}"/>
+        <!--<TextBlock Text="{Binding Text}" Style="{StaticResource MessageStyle}" />-->
+
+        <oxy:PlotView Grid.Row="1" Model="{Binding GraphDataX}" Margin="0,5"/>
+        <oxy:PlotView Grid.Row="2" Model="{Binding GraphDataY}" Margin="0,5"/>
+        <oxy:PlotView Grid.Row="3" Model="{Binding GraphDataZ}" Margin="0,5"/>
+
+        <!--<Expander Grid.Row="1" >
+            <oxy:PlotView Model="{Binding GraphDataX}"/>
+        </Expander>
+        <Expander Grid.Row="2" >
+            <oxy:PlotView Model="{Binding GraphDataY}"/>
+        </Expander>
+        <Expander Grid.Row="3" >
+            <oxy:PlotView Model="{Binding GraphDataZ}"/>
+        </Expander>-->
     </Grid>
 </Page>

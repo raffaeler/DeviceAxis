@@ -12,6 +12,7 @@
   <ItemGroup>
     <None Remove="Assets\Connect_Plugged_48x.png" />
     <None Remove="Assets\Connect_Unplugged_48x.png" />
+    <None Remove="Assets\ProcessComplete_48x.png" />
     <None Remove="Assets\Refresh.png" />
     <None Remove="Assets\StartTime_48x.png" />
     <None Remove="Assets\StartTime_48x_disabled.png" />
@@ -67,6 +68,7 @@
   <ItemGroup>
     <Resource Include="Assets\Connect_Plugged_48x.png" />
     <Resource Include="Assets\Connect_Unplugged_48x.png" />
+    <Resource Include="Assets\ProcessComplete_48x.png" />
     <Resource Include="Assets\Refresh.png" />
     <Resource Include="Assets\StartTime_48x.png" />
     <Resource Include="Assets\StartTime_48x_disabled.png" />

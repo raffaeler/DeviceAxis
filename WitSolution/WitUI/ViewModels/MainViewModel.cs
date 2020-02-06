@@ -47,6 +47,7 @@ namespace WitUI.ViewModels
             StartStopCommand = new DelegateCommand(() => OnStartStop());
             RefreshPortsCommand = new DelegateCommand(() => OnRefreshPorts());
             OpenCloseCOMCommand = new DelegateCommand(() => OnOpenCloseCOM());
+            ZeroCommand = new DelegateCommand(() => OnZero());
 
             OnRefreshPorts();
         }
@@ -54,6 +55,7 @@ namespace WitUI.ViewModels
         public ICommand StartStopCommand { get; }
         public ICommand RefreshPortsCommand { get; }
         public ICommand OpenCloseCOMCommand { get; }
+        public ICommand ZeroCommand { get; }
 
 
         public async override Task ViewLoadedAsync(FrameworkElement frameworkElement)
@@ -87,11 +89,25 @@ namespace WitUI.ViewModels
             set { _text = value; OnPropertyChanged(); }
         }
 
-        private GraphData _graphData;
-        public GraphData GraphData
+        private GraphData _graphDataX;
+        public GraphData GraphDataX
         {
-            get => _graphData;
-            set { _graphData = value; OnPropertyChanged(); }
+            get => _graphDataX;
+            set { _graphDataX = value; OnPropertyChanged(); }
+        }
+
+        private GraphData _graphDataY;
+        public GraphData GraphDataY
+        {
+            get => _graphDataY;
+            set { _graphDataY = value; OnPropertyChanged(); }
+        }
+
+        private GraphData _graphDataZ;
+        public GraphData GraphDataZ
+        {
+            get => _graphDataZ;
+            set { _graphDataZ = value; OnPropertyChanged(); }
         }
 
         private int _totalSamples;
@@ -138,7 +154,9 @@ namespace WitUI.ViewModels
                 Text = "New session";
                 var startTime = TimeSpan.Zero;
                 _wit.Start(OnFrame);
-                GraphData = new GraphData(startTime);
+                GraphDataX = new GraphData(startTime, "X", _generalConfig.ChartConfig);
+                GraphDataY = new GraphData(startTime, "Y", _generalConfig.ChartConfig);
+                GraphDataZ = new GraphData(startTime, "Z", _generalConfig.ChartConfig);
                 _timer.IsEnabled = true;
             }
             else
@@ -162,7 +180,21 @@ namespace WitUI.ViewModels
         {
             while (_queue.TryDequeue(out WitFrame frame))
             {
-                GraphData.Push(frame, DataSelection.GroupByX);
+                GraphDataX.Push(frame, DataSelection.GroupByX);
+                GraphDataY.Push(frame, DataSelection.GroupByY);
+                GraphDataZ.Push(frame, DataSelection.GroupByZ);
+            }
+
+            GraphDataX.Update();
+            GraphDataY.Update();
+            GraphDataZ.Update();
+        }
+
+        private void OnZero()
+        {
+            if (_wit != null && _wit.IsOpen)
+            {
+                _wit.SendZero();
             }
         }
     }

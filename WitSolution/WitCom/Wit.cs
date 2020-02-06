@@ -15,6 +15,8 @@ namespace WitCom
     public class Wit : IDisposable
     {
         private static readonly SequencePosition ZeroPosition = new SequencePosition();
+        byte[] _zeroAngle = new byte[] { 0xFF, 0xAA, 0x52 };
+        byte[] _zeroAccelero = new byte[] { 0xFF, 0xAA, 0x67 };
 
         //private const byte Start = 0x55;
         //private const byte P1 = 0x51;
@@ -50,9 +52,13 @@ namespace WitCom
             _serial.DataBits = 8;
             _serial.StopBits = StopBits.One;
             _serial.Handshake = Handshake.None;
+            
 
             _pipe = new Pipe(new PipeOptions());
+            IsOpen = false;
         }
+
+        public bool IsOpen { get; set; }
 
         public Task<bool> Open()
         {
@@ -61,10 +67,11 @@ namespace WitCom
             int i = 30;
             while (i > 0)
             {
-                Thread.Sleep(50);
+                Thread.Sleep(10);
                 try
                 {
                     _serial.Open();
+                    IsOpen = true;
                     return Task.FromResult(true);
                 }
                 catch (Exception)
@@ -74,6 +81,7 @@ namespace WitCom
                 }
             }
 
+            IsOpen = false;
             return Task.FromResult(false);
         }
 
@@ -104,6 +112,14 @@ namespace WitCom
         public void Dispose()
         {
             Close();
+        }
+
+        public bool SendZero()
+        {
+            _serial.Write(_zeroAngle, 0, _zeroAngle.Length);
+            _serial.Write(_zeroAccelero, 0, _zeroAngle.Length);
+
+            return true;
         }
 
         public static string[] GetPortNames()
@@ -141,6 +157,12 @@ namespace WitCom
 
                 if (reader.TryReadTo(out ReadOnlySequence<byte> sequence, _seq1.AsSpan(), true))
                 {
+                    if (sequence.Length != _minimumReadBytes - _seq1.Length)
+                    {
+                        // broken packet
+                        return Task.FromResult(reader.Position);
+                    }
+
                     sequence.CopyTo(buf);
                     onFrame(new WitFrame(_clock.Elapsed, buffer));
                     return Task.FromResult(reader.Position);
@@ -196,6 +218,7 @@ namespace WitCom
             }
             catch (Exception err)
             {
+                Debug.WriteLine(err.ToString());
                 reader.Complete(err);
             }
         }

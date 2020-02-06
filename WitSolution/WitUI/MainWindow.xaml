@@ -97,6 +97,14 @@
                         ImageOn=Assets/StopTime_48x.png, 
                         ImageOff=Assets/StartTime_48x.png}}"/>
                 </Button>
+
+                <Button Command="{Binding ZeroCommand}" Margin="5" 
+                        Style="{StaticResource toolBarButtonImage}">
+                    <Button.ToolTip>
+                        <TextBlock Text="Zeroing" FontSize="16" Foreground="DarkBlue"/>
+                    </Button.ToolTip>
+                    <Image Source="/Assets/ProcessComplete_48x.png"/>
+                </Button>
             </StackPanel>
 
 
