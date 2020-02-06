@@ -15,6 +15,7 @@ namespace WitConsole
             Task.Run(() => wit.Print());
 
             await wit.Open();
+            await wit.Start();
 
             Console.ReadKey();
         }

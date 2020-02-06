@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OxyPlot;
+using OxyPlot.Axes;
 using OxyPlot.Series;
 using WitCom;
 
@@ -18,6 +19,13 @@ namespace WitUI.Models
             AngularVelocity = Create(OxyColor.FromRgb(0, 0xff, 0));
             Angle = Create(OxyColor.FromRgb(0, 0, 0xff));
 
+            Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Minimum = -50,
+                Maximum = 50,
+            });
+
             this.Series.Add(LinearAccelereation);
             this.Series.Add(AngularVelocity);
             this.Series.Add(Angle);
@@ -31,7 +39,8 @@ namespace WitUI.Models
 
         public void Push(WitFrame witFrame, DataSelection dataSelection)
         {
-            var delta = (_startTime - witFrame.Clock).TotalMilliseconds;
+            var clipMax = 500;
+            var delta = (witFrame.Clock - _startTime).TotalMilliseconds;
             if (dataSelection == DataSelection.GroupByX)
             {
                 LinearAccelereation.Points.Add(new DataPoint(delta, witFrame.LinearAcceleration.X));
@@ -50,6 +59,16 @@ namespace WitUI.Models
                 AngularVelocity.Points.Add(new DataPoint(delta, witFrame.AngularVelocity.Z));
                 Angle.Points.Add(new DataPoint(delta, witFrame.Angle.Z));
             }
+
+            ClipLeft(LinearAccelereation.Points, clipMax);
+            ClipLeft(AngularVelocity.Points, clipMax);
+            ClipLeft(Angle.Points, clipMax);
+            this.InvalidatePlot(true);
+        }
+
+        private void ClipLeft(List<DataPoint> points, int max)
+        {
+            if (points.Count > max) points.RemoveAt(0);
         }
 
         private LineSeries Create(OxyColor color)

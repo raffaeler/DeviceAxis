@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +25,9 @@ namespace WitUI.ViewModels
         private readonly ILogger<MainViewModel> _logger;
         private readonly GeneralConfig _generalConfig;
         private readonly Dispatcher _dispatcher;
+        private readonly DispatcherTimer _timer;
         private Wit _wit;
+        private ConcurrentQueue<WitFrame> _queue = new ConcurrentQueue<WitFrame>();
 
         public MainViewModel(
             IServiceProvider serviceProvider,
@@ -34,6 +38,9 @@ namespace WitUI.ViewModels
             this._logger = logger;
             this._generalConfig = generalConfig.Value;
             this._dispatcher = Dispatcher.CurrentDispatcher;
+            _timer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(200), DispatcherPriority.Normal, OnTimer, _dispatcher);
+            _timer.IsEnabled = false;
 
             this.Title = "WitUI, by Raf @raffaeler, 2020";
 
@@ -113,26 +120,50 @@ namespace WitUI.ViewModels
                 SelectedPort = Ports.FirstOrDefault();
         }
 
-        private void OnOpenCloseCOM()
+        private async void OnOpenCloseCOM()
         {
-            //...
+            _wit = new Wit(SelectedPort);
+            var isOpen = await _wit.Open();
+            if (!isOpen) return;
+
             IsOpenCOM = !IsOpenCOM;
         }
 
         private void OnStartStop()
         {
+            if (_wit == null) return;
             IsRecording = !IsRecording;
             if (IsRecording)
             {
                 Text = "New session";
                 var startTime = TimeSpan.Zero;
+                _wit.Start(OnFrame);
                 GraphData = new GraphData(startTime);
+                _timer.IsEnabled = true;
             }
             else
             {
                 Text = "Session ended";
+                _timer.IsEnabled = false;
+                //_wit.Close();
+                //_wit = null;
             }
         }
 
+        private void OnFrame(WitFrame frame)
+        {
+            if (IsRecording)
+            {
+                _queue.Enqueue(frame);
+            }
+        }
+
+        private void OnTimer(object sender, EventArgs e)
+        {
+            while (_queue.TryDequeue(out WitFrame frame))
+            {
+                GraphData.Push(frame, DataSelection.GroupByX);
+            }
+        }
     }
 }

@@ -54,38 +54,44 @@ namespace WitCom
             _pipe = new Pipe(new PipeOptions());
         }
 
-        public Task Open()
+        public Task<bool> Open()
         {
-            if (_serial.IsOpen) return Task.CompletedTask;
+            if (_serial.IsOpen) return Task.FromResult(true);
 
-            int i = 20;
+            int i = 30;
             while (i > 0)
             {
                 Thread.Sleep(50);
                 try
                 {
                     _serial.Open();
+                    return Task.FromResult(true);
                 }
                 catch (Exception)
                 {
-                    Console.Write(".");
+                    Debug.Write(".");
                     i--;
                 }
             }
 
-            Console.WriteLine();
+            return Task.FromResult(false);
+        }
 
+        public Task Start(Action<WitFrame> onFrame = null)
+        {
+            if (onFrame == null) onFrame = this.OnFrameInternal;
             _clock.Reset();
             _clock.Start();
 
             _writeTask = _serial.BaseStream.CopyToAsync(_pipe.Writer);
-            _readTask = ConsumeAsync(_pipe.Reader, Consume);
+            _readTask = ConsumeAsync(_pipe.Reader, Consume, onFrame);
 
             return Task.WhenAll(_writeTask, _readTask);
+        }
 
-            //_serial.Write(new byte[] { 0xFF, 0xAA, 0x52 }, 0, 3);
-            //var buf = new Byte[10240];
-            //_serial.Read(buf, 0, 1024);
+        public void OnFrameInternal(WitFrame frame)
+        {
+            _queue.Enqueue(frame);
         }
 
         public void Close()
@@ -105,7 +111,8 @@ namespace WitCom
             return SerialPort.GetPortNames().OrderBy(f => f).ToArray();
         }
 
-        private Task<SequencePosition> Consume(ReadOnlySequence<byte> data)
+        private Task<SequencePosition> Consume(ReadOnlySequence<byte> data,
+            Action<WitFrame> onFrame)
         {
             if (data.Length < _minimumReadBytes)
             {
@@ -135,7 +142,7 @@ namespace WitCom
                 if (reader.TryReadTo(out ReadOnlySequence<byte> sequence, _seq1.AsSpan(), true))
                 {
                     sequence.CopyTo(buf);
-                    _queue.Enqueue(new WitFrame(_clock.Elapsed, buffer));
+                    onFrame(new WitFrame(_clock.Elapsed, buffer));
                     return Task.FromResult(reader.Position);
                 }
 
@@ -167,20 +174,21 @@ namespace WitCom
         }
 
         private async Task ConsumeAsync(PipeReader reader,
-            Func<ReadOnlySequence<byte>, Task<SequencePosition>> consumerFunc)
+            Func<ReadOnlySequence<byte>, Action<WitFrame>, Task<SequencePosition>> consumerFunc,
+            Action<WitFrame> onFrame)
         {
             try
             {
                 while (true)
                 {
-                    var read = await reader.ReadAsync();
+                    var read = await reader.ReadAsync().ConfigureAwait(false);
                     var buffer = read.Buffer;
                     if (buffer.IsEmpty && read.IsCompleted)
                     {
                         break;
                     }
 
-                    var consumed = await consumerFunc(buffer);
+                    var consumed = await consumerFunc(buffer, onFrame).ConfigureAwait(false);
                     reader.AdvanceTo(consumed);
                 }
 
