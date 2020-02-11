@@ -105,6 +105,22 @@
                     </Button.ToolTip>
                     <Image Source="/Assets/ProcessComplete_48x.png"/>
                 </Button>
+
+                <Button Command="{Binding HorizontalCommand}" Margin="5" 
+                        Style="{StaticResource toolBarButtonImage}">
+                    <Button.ToolTip>
+                        <TextBlock Text="Horizontal" FontSize="16" Foreground="DarkBlue"/>
+                    </Button.ToolTip>
+                    <Image Source="/Assets/HorizontalScrollBarControl_16x.png"/>
+                </Button>
+
+                <Button Command="{Binding VerticalCommand}" Margin="5" 
+                        Style="{StaticResource toolBarButtonImage}">
+                    <Button.ToolTip>
+                        <TextBlock Text="Vertical" FontSize="16" Foreground="DarkBlue"/>
+                    </Button.ToolTip>
+                    <Image Source="/Assets/VerticalScrollBarControl_16x.png"/>
+                </Button>
             </StackPanel>
 
 

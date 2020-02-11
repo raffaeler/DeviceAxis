@@ -17,6 +17,8 @@ namespace WitCom
         private static readonly SequencePosition ZeroPosition = new SequencePosition();
         byte[] _zeroAngle = new byte[] { 0xFF, 0xAA, 0x52 };
         byte[] _zeroAccelero = new byte[] { 0xFF, 0xAA, 0x67 };
+        byte[] _horizontal = new byte[] { 0xFF, 0xAA, 0x65 };
+        byte[] _vertical = new byte[] { 0xFF, 0xAA, 0x66 };
 
         //private const byte Start = 0x55;
         //private const byte P1 = 0x51;
@@ -118,6 +120,20 @@ namespace WitCom
         {
             _serial.Write(_zeroAngle, 0, _zeroAngle.Length);
             _serial.Write(_zeroAccelero, 0, _zeroAngle.Length);
+
+            return true;
+        }
+
+        public bool SendHorizontal()
+        {
+            _serial.Write(_horizontal, 0, _horizontal.Length);
+
+            return true;
+        }
+
+        public bool SendVertical()
+        {
+            _serial.Write(_vertical, 0, _vertical.Length);
 
             return true;
         }
