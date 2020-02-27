@@ -108,13 +108,13 @@ namespace WitCom
 
             public override string ToString()
             {
-                return $"{X.ToString("f2")} g\r\n{Z.ToString("f2")} g\r\n{Z.ToString("f2")} g\r\n\r\n";
+                return $"{X.ToString("f2")} g\r\n{Y.ToString("f2")} g\r\n{Z.ToString("f2")} g\r\n\r\n";
             }
 
             public string ToString(bool includeTemp)
             {
                 if (!includeTemp) return ToString();
-                return $"{X.ToString("f2")} g\r\n{Z.ToString("f2")} g\r\n{Z.ToString("f2")} g\r\n{T.ToString("f2")} °C\r\n\r\n";
+                return $"{X.ToString("f2")} g\r\n{Y.ToString("f2")} g\r\n{Z.ToString("f2")} g\r\n{T.ToString("f2")} °C\r\n\r\n";
             }
         }
 
