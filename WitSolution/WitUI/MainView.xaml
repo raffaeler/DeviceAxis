@@ -26,10 +26,14 @@
 
         <!--<TextBlock Text="{Binding Text}" Style="{StaticResource MessageStyle}" />-->
 
-        <oxy:PlotView Grid.Row="1" Model="{Binding GraphDataX}" Margin="0,5"/>
+        <!--<oxy:PlotView Grid.Row="1" Model="{Binding GraphDataX}" Margin="0,5"/>
         <oxy:PlotView Grid.Row="2" Model="{Binding GraphDataY}" Margin="0,5"/>
-        <oxy:PlotView Grid.Row="3" Model="{Binding GraphDataZ}" Margin="0,5"/>
+        <oxy:PlotView Grid.Row="3" Model="{Binding GraphDataZ}" Margin="0,5"/>-->
 
+        <oxy:PlotView Grid.Row="1" Model="{Binding GraphDataLA}" Margin="0,5"/>
+        <oxy:PlotView Grid.Row="2" Model="{Binding GraphDataAV}" Margin="0,5"/>
+        <oxy:PlotView Grid.Row="3" Model="{Binding GraphDataA}" Margin="0,5"/>
+        
         <!--<Expander Grid.Row="1" >
             <oxy:PlotView Model="{Binding GraphDataX}"/>
         </Expander>

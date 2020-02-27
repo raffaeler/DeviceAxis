@@ -48,6 +48,8 @@ namespace WitUI.ViewModels
             RefreshPortsCommand = new DelegateCommand(() => OnRefreshPorts());
             OpenCloseCOMCommand = new DelegateCommand(() => OnOpenCloseCOM());
             ZeroCommand = new DelegateCommand(() => OnZero());
+            HorizontalCommand = new DelegateCommand(() => OnHorizontal());
+            VerticalCommand = new DelegateCommand(() => OnVertical());
 
             OnRefreshPorts();
         }
@@ -57,6 +59,8 @@ namespace WitUI.ViewModels
         public ICommand OpenCloseCOMCommand { get; }
         public ICommand ZeroCommand { get; }
 
+        public ICommand HorizontalCommand { get; }
+        public ICommand VerticalCommand { get; }
 
         public async override Task ViewLoadedAsync(FrameworkElement frameworkElement)
         {
@@ -110,6 +114,28 @@ namespace WitUI.ViewModels
             set { _graphDataZ = value; OnPropertyChanged(); }
         }
 
+        private GraphDataCat _graphDataLA;
+        public GraphDataCat GraphDataLA
+        {
+            get => _graphDataLA;
+            set { _graphDataLA = value; OnPropertyChanged(); }
+        }
+
+        private GraphDataCat _graphDataAV;
+        public GraphDataCat GraphDataAV
+        {
+            get => _graphDataAV;
+            set { _graphDataAV = value; OnPropertyChanged(); }
+        }
+
+        private GraphDataCat _graphDataA;
+        public GraphDataCat GraphDataA
+        {
+            get => _graphDataA;
+            set { _graphDataA = value; OnPropertyChanged(); }
+        }
+
+
         private int _totalSamples;
         public int TotalSamples
         {
@@ -154,9 +180,19 @@ namespace WitUI.ViewModels
                 Text = "New session";
                 var startTime = TimeSpan.Zero;
                 _wit.Start(OnFrame);
-                GraphDataX = new GraphData(startTime, "X", _generalConfig.ChartConfig);
-                GraphDataY = new GraphData(startTime, "Y", _generalConfig.ChartConfig);
-                GraphDataZ = new GraphData(startTime, "Z", _generalConfig.ChartConfig);
+                //GraphDataX = new GraphData(startTime, "X", _generalConfig.ChartConfig);
+                //GraphDataY = new GraphData(startTime, "Y", _generalConfig.ChartConfig);
+                //GraphDataZ = new GraphData(startTime, "Z", _generalConfig.ChartConfig);
+
+                GraphDataLA = new GraphDataCat(startTime, "Linear Acceleration",
+                    _generalConfig.ChartConfig, CatSelection.GroupByLinearAcceleration);
+
+                GraphDataAV = new GraphDataCat(startTime, "Angular Velocity",
+                    _generalConfig.ChartConfig, CatSelection.GroupByAngularVelocity);
+
+                GraphDataA = new GraphDataCat(startTime, "Angle",
+                    _generalConfig.ChartConfig, CatSelection.GroupByAngle);
+
                 _timer.IsEnabled = true;
             }
             else
@@ -176,25 +212,55 @@ namespace WitUI.ViewModels
             }
         }
 
+        //private void OnTimer(object sender, EventArgs e)
+        //{
+        //    while (_queue.TryDequeue(out WitFrame frame))
+        //    {
+        //        GraphDataX.Push(frame, DataSelection.GroupByX);
+        //        GraphDataY.Push(frame, DataSelection.GroupByY);
+        //        GraphDataZ.Push(frame, DataSelection.GroupByZ);
+        //    }
+
+        //    GraphDataX.Update();
+        //    GraphDataY.Update();
+        //    GraphDataZ.Update();
+        //}
         private void OnTimer(object sender, EventArgs e)
         {
             while (_queue.TryDequeue(out WitFrame frame))
             {
-                GraphDataX.Push(frame, DataSelection.GroupByX);
-                GraphDataY.Push(frame, DataSelection.GroupByY);
-                GraphDataZ.Push(frame, DataSelection.GroupByZ);
+                GraphDataLA.Push(frame, CatSelection.GroupByLinearAcceleration);
+                GraphDataAV.Push(frame, CatSelection.GroupByAngularVelocity);
+                GraphDataA.Push(frame, CatSelection.GroupByAngle);
             }
 
-            GraphDataX.Update();
-            GraphDataY.Update();
-            GraphDataZ.Update();
+            GraphDataLA.Update();
+            GraphDataAV.Update();
+            GraphDataA.Update();
         }
+
 
         private void OnZero()
         {
             if (_wit != null && _wit.IsOpen)
             {
                 _wit.SendZero();
+            }
+        }
+
+        private void OnHorizontal()
+        {
+            if (_wit != null && _wit.IsOpen)
+            {
+                _wit.SendHorizontal();
+            }
+        }
+
+        private void OnVertical()
+        {
+            if (_wit != null && _wit.IsOpen)
+            {
+                _wit.SendVertical();
             }
         }
     }

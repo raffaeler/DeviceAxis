@@ -12,12 +12,14 @@
   <ItemGroup>
     <None Remove="Assets\Connect_Plugged_48x.png" />
     <None Remove="Assets\Connect_Unplugged_48x.png" />
+    <None Remove="Assets\HorizontalScrollBarControl_16x.png" />
     <None Remove="Assets\ProcessComplete_48x.png" />
     <None Remove="Assets\Refresh.png" />
     <None Remove="Assets\StartTime_48x.png" />
     <None Remove="Assets\StartTime_48x_disabled.png" />
     <None Remove="Assets\StopTime_48x.png" />
     <None Remove="Assets\StopTime_48x_disabled.png" />
+    <None Remove="Assets\VerticalScrollBarControl_16x.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -68,12 +70,14 @@
   <ItemGroup>
     <Resource Include="Assets\Connect_Plugged_48x.png" />
     <Resource Include="Assets\Connect_Unplugged_48x.png" />
+    <Resource Include="Assets\HorizontalScrollBarControl_16x.png" />
     <Resource Include="Assets\ProcessComplete_48x.png" />
     <Resource Include="Assets\Refresh.png" />
     <Resource Include="Assets\StartTime_48x.png" />
     <Resource Include="Assets\StartTime_48x_disabled.png" />
     <Resource Include="Assets\StopTime_48x.png" />
     <Resource Include="Assets\StopTime_48x_disabled.png" />
+    <Resource Include="Assets\VerticalScrollBarControl_16x.png" />
   </ItemGroup>
 
   <ItemGroup>
